@@ -1,0 +1,2235 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocab Trainer | 智慧英文單字語境建立與挑戰</title>
+    <style>
+        /* --- 簡約柔和風格 (Minimalist & Soft Style) CSS 變數 --- */
+        :root {
+            --bg-dark: #f8fafc;        /* 輕盈的淺 slate 灰白 */
+            --bg-card: #ffffff;        /* 純白卡片 */
+            --primary: #6366f1;        /* 柔和靛藍 (Soft Indigo) */
+            --secondary: #818cf8;      --accent: #f43f5e;         /* 櫻花柔粉 (Soft Rose) */
+            --text-main: #1e293b;      /* 深板岩灰 */
+            --text-muted: #64748b;     /* 中性灰 */
+            --success: #10b981;        /* 翡翠綠 (Emerald) */
+            --shadow-soft: 0 10px 30px -5px rgba(99, 102, 241, 0.05), 0 8px 15px -6px rgba(0, 0, 0, 0.03);
+            --border-soft: rgba(99, 102, 241, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, 'Heiti TC', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- 頂部導覽列 --- */
+        header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-soft);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.02);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.1rem 2rem;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+
+        nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 20px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-btn:hover {
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .nav-btn.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+            font-weight: 700;
+        }
+
+        .btn-config {
+            background: transparent;
+            border: 1px dashed var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-config:hover {
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--secondary);
+        }
+
+        /* --- 主內容區塊 --- */
+        main {
+            max-width: 1000px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- 通用卡片與輸入元件 --- */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            border-radius: 20px;
+            padding: 2.2rem;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* --- 篩選與設置面板 --- */
+        .setting-panel {
+            background: #f8fafc;
+            border: 1px solid var(--border-soft);
+            border-radius: 14px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .setting-label {
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .styled-select {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .styled-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        /* 模式切換按鈕組 */
+        .mode-btn-group {
+            display: flex;
+            background: #e2e8f0;
+            padding: 0.25rem;
+            border-radius: 8px;
+        }
+
+        .mode-tab {
+            border: none;
+            background: transparent;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-tab.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        /* --- 學生造句寫作介面樣式 --- */
+        .writing-card {
+            background: #ffffff;
+            border: 1px solid var(--border-soft);
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            transition: all 0.25s;
+        }
+
+        .writing-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 6px 16px rgba(99,102,241,0.04);
+        }
+
+        .writing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .writing-word-info {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .writing-word-meaning {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .writing-textarea {
+            width: 100%;
+            height: 70px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            resize: none;
+            outline: none;
+            transition: all 0.25s;
+            margin-bottom: 0.8rem;
+        }
+
+        .writing-textarea:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .writing-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.6rem;
+        }
+
+        /* 批改結果面版 */
+        .feedback-box {
+            margin-top: 1rem;
+            background: #f0fdf4; 
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback-box.error {
+            background: #fff1f2; 
+            border-color: rgba(244, 63, 94, 0.2);
+        }
+
+        .feedback-score {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-score.low {
+            color: var(--accent);
+        }
+
+        .feedback-text {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-suggestion {
+            background: rgba(255,255,255,0.7);
+            border-left: 3px solid var(--primary);
+            padding: 0.6rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-style: italic;
+            color: var(--text-main);
+        }
+
+        button.btn-action {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #ffffff;
+            border: none;
+            padding: 0.8rem 1.8rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.15);
+        }
+
+        button.btn-action:hover {
+            transform: translateY(-1.5px);
+            box-shadow: 0 6px 15px rgba(99, 102, 241, 0.25);
+        }
+
+        button.btn-action:disabled {
+            background: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* --- 字典查詢結果 --- */
+        .dict-result {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .word-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .word-info-group {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .word-title {
+            font-size: 2.3rem;
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .phonetic {
+            color: var(--text-muted);
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .definition-block {
+            margin-bottom: 1.2rem;
+            background: #f8fafc;
+            padding: 1.2rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .part-of-speech {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 0.6rem;
+        }
+
+        .meaning {
+            font-size: 1.05rem;
+            margin-bottom: 0.3rem;
+            color: var(--text-main);
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .example {
+            color: var(--text-muted);
+            border-left: 2px solid var(--secondary);
+            padding-left: 0.8rem;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+
+        /* --- 語境偵探 Canvas 遊戲專區 --- */
+        .game-canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        #game-canvas {
+            width: 100%;
+            max-width: 800px;
+            height: auto; 
+            aspect-ratio: 800 / 380; 
+            background: #f8fafc;
+            border: 1px solid var(--border-soft);
+            border-radius: 16px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.01);
+            margin-bottom: 1.5rem;
+        }
+
+        .game-input-area {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .game-status-msg {
+            font-size: 1rem;
+            font-weight: 600;
+            min-height: 1.5rem;
+            text-align: center;
+            transition: color 0.3s;
+            color: var(--text-muted);
+        }
+
+        .review-section {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-soft);
+            padding-top: 2rem;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .review-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .ai-card {
+            background: #ffffff;
+            border: 1px solid var(--border-soft);
+            border-radius: 14px;
+            padding: 1.5rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+            position: relative;
+        }
+
+        .ai-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .card-header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-word-tag {
+            font-size: 1.25rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .ai-situation {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.06);
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+        }
+
+        .ai-sentence {
+            font-size: 1.15rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        /* --- 收藏單字清單專屬 --- */
+        .list-add-box {
+            background: rgba(99, 102, 241, 0.03);
+            border: 1px dashed var(--secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .word-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .vocab-card {
+            background: #ffffff;
+            border: 1px solid var(--border-soft);
+            border-radius: 14px;
+            padding: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.01);
+            transition: all 0.25s ease;
+        }
+
+        .vocab-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 16px rgba(99, 102, 241, 0.05);
+        }
+
+        .vocab-info {
+            cursor: pointer;
+        }
+
+        .vocab-info h4 {
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .vocab-info h4:hover {
+            text-decoration: underline;
+        }
+
+        .vocab-meaning {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-top: 0.4rem;
+            font-weight: 600;
+        }
+
+        .btn-small {
+            background: transparent;
+            border: 1px solid var(--border-soft);
+            color: var(--text-muted);
+            padding: 0.3rem 0.6rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(244, 63, 94, 0.05);
+        }
+
+        .btn-collect {
+            background: rgba(99, 102, 241, 0.06);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-collect:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .recommendation-zone {
+            background: #ffffff;
+            border: 1px solid var(--border-soft);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .recommendation-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1rem;
+        }
+
+        .rec-tag-btn {
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .rec-tag-btn:hover {
+            background: rgba(99, 102, 241, 0.08);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        #toast-message {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #ffffff;
+            padding: 0.8rem 1.6rem;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            font-size: 0.95rem;
+            font-weight: 600;
+            animation: toastFade 0.3s ease;
+        }
+
+        @keyframes toastFade {
+            from { bottom: 10px; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        /* --- 彈出式 AI 金鑰設定視窗樣式 --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .modal-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-soft);
+            border-radius: 20px;
+            max-width: 480px;
+            width: 90%;
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
+        }
+
+        .empty-tip {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem 1rem;
+            font-style: italic;
+        }
+
+        .error-msg {
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 1rem; }
+            .search-box, .game-input-area { flex-direction: column; }
+            button.btn-action { width: 100%; }
+            .word-grid-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo" onclick="switchView('dict-view')">Vocab Trainer</div>
+            <nav>
+                <button class="nav-btn active" id="btn-dict-view" onclick="switchView('dict-view')">單字字典查詢</button>
+                <button class="nav-btn" id="btn-game-view" onclick="switchView('game-view')">語境偵探遊戲 🕵️‍♂️</button>
+                <button class="nav-btn" id="btn-ai-view" onclick="switchView('ai-view')">學生造句練習 ✍️</button>
+                <button class="nav-btn" id="btn-list-view" onclick="switchView('list-view')">我的單字列表 📚</button>
+                <button class="nav-btn btn-config" onclick="openConfigModal()">⚙️ AI 金鑰設定</button>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- 1. 單字字典查詢部分 -->
+        <section id="dict-view" class="view-section active">
+            <div class="card">
+                <h2>🔍 智慧單字即時查詢 (連線教育字典)</h2>
+                <div class="search-box">
+                    <input type="text" id="dict-input" placeholder="請輸入欲查詢的英文單字... (例如: absolute)">
+                    <button class="btn-action" onclick="searchWord()">搜尋</button>
+                </div>
+
+                <div id="dict-result" class="dict-result">
+                    <div class="word-header">
+                        <div class="word-info-group">
+                            <span class="word-title" id="res-word">Word</span>
+                            <span class="phonetic" id="res-phonetic">/phonetic/</span>
+                        </div>
+                        <button class="btn-collect" id="dict-collect-btn">收藏此單字 ✨</button>
+                    </div>
+                    <div id="res-definitions"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 語境偵探遊戲部分 -->
+        <section id="game-view" class="view-section">
+            <div class="card">
+                <h2>🕵️‍♂️ 語境偵探：情境單字填空挑戰</h2>
+                
+                <!-- 控制面板 -->
+                <div class="setting-panel">
+                    <div class="setting-row">
+                        <span class="setting-label">🎮 選擇挑戰模式：</span>
+                        <div class="mode-btn-group">
+                            <button id="mode-ai" class="mode-tab active" onclick="switchGameMode('ai')">CEFR 動態生成挑戰</button>
+                            <button id="mode-custom" class="mode-tab" onclick="switchGameMode('custom')">我的單字本複習測驗</button>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row" id="cefr-select-row">
+                        <span class="setting-label">🎯 選擇難度級別 (CEFR)：</span>
+                        <select id="game-level-select" class="styled-select" onchange="onGameLevelChange(this.value)">
+                            <option value="A1">A1 (入門核心字彙)</option>
+                            <option value="A2">A2 (基礎實用字彙)</option>
+                            <option value="B1" selected>B1 (中級進階字彙)</option>
+                            <option value="B2">B2 (中高級大考字彙)</option>
+                            <option value="C1">C1 (高級學術字彙)</option>
+                            <option value="C2">C2 (專業精通字彙)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="game-canvas-container">
+                    <canvas id="game-canvas"></canvas>
+                    <div class="game-input-area">
+                        <input type="text" id="game-input" placeholder="請看首尾提示並輸入正確單字..." autocomplete="off" disabled>
+                        <button class="btn-action" id="submit-btn" onclick="checkAnswer()" disabled>提交答案</button>
+                        <button class="btn-action" id="start-btn" onclick="startGame()">開始挑戰</button>
+                    </div>
+                    <div class="game-status-msg" id="game-status-msg">點擊「開始挑戰」展開你的偵探之旅！</div>
+                </div>
+
+                <div id="game-review-section" class="review-section">
+                    <div class="review-title">📝 本輪挑戰單字釋義與回顧</div>
+                    <div class="ai-grid" id="game-review-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 學生自主造句寫作練習部分 -->
+        <section id="ai-view" class="view-section">
+            <div class="card">
+                <h2>✍️ 智慧造句挑戰：AI 英文寫作教練</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                    系統將從您的「我的單字列表」中自動抽取 5 個單字進行造句考驗。點擊 AI 批改，獲得即時文法糾錯與寫作精進建議！
+                </p>
+
+                <div class="library-selector-wrapper" style="margin-bottom: 1.5rem;">
+                    <span style="font-weight: 700; color: var(--text-main);">📝 挑戰設定</span>
+                    <button class="btn-action" id="btn-draw-writing" onclick="initWritingSession()">
+                        🎲 隨機抽取 5 個單字開啟練習
+                    </button>
+                </div>
+
+                <div id="writing-board-container" class="ai-grid">
+                    <div class="empty-tip">
+                        👉 點擊上方「🎲 隨機抽取 5 個單字開啟練習」按鈕，展開專屬造句大挑戰！
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 我的單字列表頁面 -->
+        <section id="list-view" class="view-section">
+            <div class="card">
+                <h2>📚 我的單字筆記本</h2>
+                <div class="list-add-box">
+                    <div style="font-weight: 700; margin-bottom: 0.8rem; color: var(--primary);">➕ 快速手動新增單字</div>
+                    <div class="search-box" style="margin-bottom: 0;">
+                        <input type="text" id="manual-word" placeholder="英文單字 (example: appreciate)">
+                        <input type="text" id="manual-meaning" placeholder="中文釋義 (example: 感激)">
+                        <button class="btn-action" style="padding: 0.8rem 1.5rem;" onclick="addManualWord()">新增</button>
+                    </div>
+                </div>
+                <div class="word-grid-layout" id="word-list-container"></div>
+
+                <div class="recommendation-zone">
+                    <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">🎯 國際 CEFR 核心單字推薦與快速收藏</h3>
+                    <div class="recommendation-tags" id="rec-tags-container"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- AI 金鑰設定模窗 Overlay -->
+    <div id="config-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">⚙️ Gemini AI 智慧通行設定</div>
+            <div class="modal-body">
+                <p style="margin-bottom: 0.8rem; font-size: 0.9rem; color: var(--text-muted);">
+                    請在下方欄位貼入您從 <strong>Google AI Studio</strong> 申請出來的 <code>AQ.</code> 或 <code>AIzaSy</code> 開頭之 API 金鑰。
+                </p>
+                <p style="margin-bottom: 1.2rem; font-size: 0.85rem; color: #4338ca; background: #e0e7ff; padding: 0.6rem; border-radius: 8px;">
+                    💡 <strong>安全保護</strong>：此金鑰會以安全沙盒儲存在此瀏覽器本機端（LocalStorage），永遠不會上傳到任何外部或 Vercel/GitHub 伺服器，100% 防止額度外洩！
+                </p>
+                <input type="text" id="modal-api-input" placeholder="請貼入您的 Gemini API 金鑰..." style="width: 100%; border: 2px solid #cbd5e1; border-radius: 10px; padding: 0.6rem 1rem; font-size: 0.9rem; outline: none; margin-bottom: 0.5rem;">
+                <a href="https://aistudio.google.com/" target="_blank" style="font-size: 0.85rem; color: var(--primary); text-decoration: underline;">👉 前往免費申請一把個人專屬金鑰 (Google 帳號免費註冊)</a>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-small" onclick="closeConfigModal()" style="padding: 0.5rem 1rem; border-radius: 8px;">取消</button>
+                <button class="btn-action" onclick="saveApiKey()" style="padding: 0.5rem 1.2rem; font-size: 0.9rem; border-radius: 8px; box-shadow: none;">儲存並啟用 AI</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-message"></div>
+
+    <script>
+        /* --- 0. 全域常數與 API 基礎配置 --- */
+        // 此處保持空字串。代碼上傳至公開 GitHub 亦 100% 安全！
+        const apiKey = ""; 
+
+        // 熟練度統計數據持久化
+        let wordStats = JSON.parse(localStorage.getItem('wordStats')) || {};
+
+        function saveWordStats() {
+            localStorage.setItem('wordStats', JSON.stringify(wordStats));
+        }
+
+        // 動態獲取金鑰：優先讀取瀏覽器本機 LocalStorage，若無則降級為常數空字串
+        function getActiveApiKey() {
+            return localStorage.getItem('vocab_trainer_api_key') || apiKey;
+        }
+
+        /* --- 大容量離線備用資料庫 --- */
+        const localCefrData = {
+            A1: [
+                { word: "focus", cn: "專注、聚焦", en: "It is essential to focus on your homework instead of watching videos." },
+                { word: "passenger", cn: "乘客、旅客", en: "The polite driver waited patiently for every passenger to get on." },
+                { word: "climate", cn: "氣候、風氣", en: "Our teacher explained how the local climate affects the farm plants." },
+                { word: "accident", cn: "意外、交通事故", en: "The minor car accident delayed my mom from cooking dinner." },
+                { word: "energy", cn: "能量、能源", en: "Young students need plenty of sleep to keep their energy high." },
+                { word: "normal", cn: "正常的、平常的", en: "It is perfectly normal to feel nervous before a big classroom presentation." },
+                { word: "crowded", cn: "擁擠的", en: "The school cafeteria is always crowded during the short lunch break." },
+                { word: "simple", cn: "簡單的、純樸的", en: "The English teacher gave us a simple assignment to write a short paragraph." }
+            ],
+            A2: [
+                { word: "diligent", cn: "勤奮的、用功的", en: "Only diligent students who review daily can get a perfect score." },
+                { word: "behave", cn: "表現、舉止", en: "During ceremonies, high schoolers are expected to behave politely." },
+                { word: "damage", cn: "損害、破壞", en: "The strong wind caused severe damage to the school playground." },
+                { word: "century", cn: "世紀、一百年", en: "The historic science hall was constructed in the twentieth century." },
+                { word: "ignore", cn: "忽略、不理會", en: "Never ignore the basic rules of safety when working in the lab." },
+                { word: "balance", cn: "平衡、均衡", en: "High schoolers must learn to balance their academic studies and club activities." },
+                { word: "crowd", cn: "人群、大群人", en: "A large crowd of excited students gathered to cheer for the school basketball team." },
+                { word: "polite", cn: "有禮貌的", en: "It is important to be polite to the bus driver when you commute to school." }
+            ],
+            B1: [
+                { word: "frustrated", cn: "感到沮喪的、挫敗的", en: "Jack felt frustrated when he studied all night but still failed." },
+                { word: "participate", cn: "參與、參加", en: "You are encouraged to participate in club activities for fun." },
+                { word: "postpone", cn: "延期、延後", en: "The rain forced us to postpone the campus concert until Friday." },
+                { word: "simulate", cn: "模擬、模仿", en: "To simulate the actual test, our school held a mock exam yesterday." },
+                { word: "collaborate", cn: "合作、共同努力", en: "Classmates collaborate on a group project to share the workload." },
+                { word: "beneficial", cn: "有益的、有利的", en: "Doing active physical exercise daily is highly beneficial to our health." },
+                { word: "complex", cn: "複雜的", en: "The science teacher explained the complex chemical reaction using a diagram." },
+                { word: "evaluate", cn: "評估、評價", en: "Teachers will evaluate your academic performance based on class projects." }
+            ],
+            B2: [
+                { word: "analyze", cn: "分析、探討", en: "Our physics teacher taught us how to analyze experimental data." },
+                { word: "dominate", cn: "支配、主導", en: "The championship team began to dominate the tournament early on." },
+                { word: "estimate", cn: "估計、估算", en: "Educators estimate that online classes will become even more popular." },
+                { word: "guarantee", cn: "保證、擔保", en: "A high GPA doesn't guarantee a smooth path, but it surely helps." },
+                { word: "negotiate", cn: "協商、談判", en: "Students should learn how to negotiate and solve disputes peacefully." },
+                { word: "pioneer", cn: "開創者、先驅", en: "The young scientist is considered a pioneer in the field of green energy." },
+                { word: "preserve", cn: "保存、保護", en: "It is our responsibility to preserve the historical relics on campus." },
+                { word: "prosperity", cn: "繁榮、興旺", en: "Quality education is the cornerstone of a nation's future prosperity." }
+            ],
+            C1: [
+                { word: "eradicate", cn: "根除、消滅", en: "Global health organizations strive to eradicate infectious diseases." },
+                { word: "fluctuate", cn: "波動、變動起伏", en: "A teenager's emotions might fluctuate wildly due to heavy stress." },
+                { word: "undermine", cn: "削弱、暗中破壞", en: "Staying up late constantly will eventually undermine your immune system." },
+                { word: "bewildered", cn: "極為困惑的", en: "The student was bewildered by the advanced calculus formulas." },
+                { word: "superficial", cn: "表面的、膚淺的", en: "A superficial study of math will not prepare you for the test." },
+                { word: "cultivate", cn: "培養、耕作", en: "High schools aim to cultivate critical thinking skills in young learners." },
+                { word: "contradict", cn: "反駁、與...矛盾", en: "The student's second statement seemed to contradict his previous excuse." },
+                { word: "persistent", cn: "持續的、執著的", en: "Through persistent efforts, the high school debate team won the championship." }
+            ],
+            C2: [
+                { word: "ambiguous", cn: "模稜雙切", en: "The prompt was so ambiguous that even teachers disputed the answer." },
+                { word: "conspire", cn: "共謀、策劃", en: "Political factions conspire behind closed doors to influence policy." },
+                { word: "deteriorate", cn: "惡化、退化", en: "Without care, your physical condition may deteriorate rapidly." },
+                { word: "jeopardize", cn: "危害、使受危險", en: "Any academic dishonesty will jeopardize your college application." },
+                { word: "unprecedented", cn: "空前的、史未有過的", en: "The technological shift represents an unprecedented era in human history." },
+                { word: "scruturize", cn: "細查、詳細審查", en: "The admissions committee will scrutinize every essay in the portfolio." },
+                { word: "eloquent", cn: "雄辯的、口才流利的", en: "She gave an eloquent speech at the graduation ceremony that touched everyone." },
+                { word: "prevalent", cn: "普遍的、盛行的", en: "Social media use has become prevalent among high school students worldwide." }
+            ]
+        };
+
+        // 智慧金鑰檢測
+        function checkApiKeyStatus() {
+            const key = getActiveApiKey();
+            return typeof key === 'string' && key.trim() !== "";
+        }
+
+        // 智慧型號偵探：依據運行環境動態切換模型，防止外部公開伺服器調用 2.5 預覽模型造成 404
+        function getActiveGeminiModel() {
+            const hasCustomKey = !!localStorage.getItem('vocab_trainer_api_key');
+            
+            // 如果使用者設定了「自訂個人金鑰」，不論在哪個網域，都必須使用公開標準模型
+            if (hasCustomKey) {
+                return "gemini-2.5-flash"; 
+            }
+            
+            const hostname = window.location.hostname;
+            // 如果偵測到在平台內部的沙盒預覽主機且無個人金鑰 (使用系統代入)
+            if (hostname.includes("usercontent.goog") || hostname.includes("localhost") === false && hostname === "") {
+                return "gemini-2.5-flash-preview-09-2025";
+            }
+            // 外部生產環境 (Vercel, GitHub Pages, 電腦本地點開) 調用標準正式公開模型
+            return "gemini-2.5-flash";
+        }
+
+        // 遊戲核心數據庫全域變數
+        let activeGameLevel = "B1";
+        let currentGameMode = "ai"; 
+        let gameData = [...localCefrData[activeGameLevel]];
+
+        // 遊戲狀態機
+        const gameState = {
+            score: 0,
+            currentIndex: 0,
+            isPlaying: false,
+            timeLeft: 100,
+            maxTime: 15,
+            feedbackType: "",   // "correct", "wrong", "timeout", ""
+            shakeIntensity: 0,
+            particles: [],
+            gameLoopId: null,
+            loading: false      
+        };
+
+        // HTML5 Canvas 初始化與比例自適應常數
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const logicalWidth = 800;
+        const logicalHeight = 380;
+
+        // 智慧比例自適應函數
+        function initCanvasResolution() {
+            const dpr = window.devicePixelRatio || 1;
+            const displayWidth = Math.min(800, canvas.parentElement.clientWidth || 800);
+            const displayHeight = displayWidth * (380 / 800);
+
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
+
+            canvas.width = displayWidth * dpr;
+            canvas.height = displayHeight * dpr;
+
+            ctx.resetTransform();
+            const scale = (displayWidth * dpr) / logicalWidth;
+            ctx.scale(scale, scale);
+
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+        }
+
+        /* --- 彈出式設定模窗控制 --- */
+        function openConfigModal() {
+            document.getElementById('config-modal').style.display = 'flex';
+            document.getElementById('modal-api-input').value = localStorage.getItem('vocab_trainer_api_key') || '';
+        }
+
+        function closeConfigModal() {
+            document.getElementById('config-modal').style.display = 'none';
+        }
+
+        function saveApiKey() {
+            const val = document.getElementById('modal-api-input').value.trim();
+            localStorage.setItem('vocab_trainer_api_key', val);
+            showToast("🔑 AI 金鑰通行設定已在本地瀏覽器存檔！AI 連線即將重新啟動。");
+            closeConfigModal();
+            
+            // 如果玩家當前在單字查詢或剛好想查詢
+            if (document.getElementById('dict-input').value) {
+                searchWord();
+            }
+        }
+
+        /* --- Particle 粒子特效實作 --- */
+        class Particle {
+            constructor(x, y, color, type) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 2;
+                this.speedX = (Math.random() - 0.5) * 6;
+                this.speedY = type === 'success' ? (Math.random() - 0.7) * 8 : (Math.random() - 0.5) * 4;
+                this.color = color;
+                this.gravity = type === 'success' ? 0.15 : 0.05;
+                this.alpha = 1;
+                this.life = Math.random() * 25 + 20;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.speedY += this.gravity;
+                this.alpha -= 1 / this.life;
+                if (this.alpha < 0) this.alpha = 0;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createExplosion(x, y, success = true) {
+            const count = success ? 35 : 15;
+            const colors = success ? ['#a7f3d0', '#c7d2fe', '#fbcfe8', '#fef08a'] : ['#fecdd3', '#cbd5e1', '#94a3b8'];
+            const type = success ? 'success' : 'fail';
+            
+            for (let i = 0; i < count; i++) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                gameState.particles.push(new Particle(x, y, color, type));
+            }
+        }
+
+        /* --- 1. 頁籤切換與視圖初始化 --- */
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(viewId).classList.add('active');
+            
+            const activeBtn = document.getElementById(`btn-${viewId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            if (viewId === 'game-view') {
+                initCanvasResolution();
+                if(!gameState.isPlaying) {
+                    drawGameLobby();
+                }
+            } else if (viewId === 'list-view') {
+                renderWordList();
+                renderRecommendationTags();
+            }
+        }
+
+        /* --- 自訂 Toast 提示機制 --- */
+        function showToast(message) {
+            const toast = document.getElementById('toast-message');
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        /* --- 產生首尾字母填空字串 (e.g. diligent -> d _ _ _ _ _ _ t) --- */
+        function getWordHint(word) {
+            if (word.length <= 2) return word;
+            const middleCount = word.length - 2;
+            const blanks = " _ ".repeat(middleCount).trim();
+            return `${word[0].toUpperCase()} ${blanks} ${word[word.length - 1].toUpperCase()}`;
+        }
+
+        /* --- 畫布文字自動換行 --- */
+        function wrapText(context, text, x, y, maxWidth, lineHeight) {
+            let words = text.split(' ');
+            let line = '';
+            let currentY = y;
+
+            for (let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = context.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    context.fillText(line, x, currentY);
+                    line = words[n] + ' ';
+                    currentY += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            }
+            context.fillText(line, x, currentY);
+        }
+
+        /* --- 2. 免費 API 單字字典查詢加上純英文體驗 --- */
+        let currentSearchedWord = null;
+
+        async function searchWord(targetWord = null) {
+            const wordInput = document.getElementById('dict-input');
+            const word = targetWord ? targetWord : wordInput.value.trim();
+            
+            if (targetWord) {
+                wordInput.value = targetWord;
+                switchView('dict-view');
+            }
+
+            if (!word) return;
+
+            const resultDiv = document.getElementById('dict-result');
+            const defsContainer = document.getElementById('res-definitions');
+            
+            defsContainer.innerHTML = `<p style="color: var(--text-muted);">🔄 Loading dictionary definition...</p>`;
+            resultDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                if (!response.ok) throw new Error('Word not found');
+                
+                const data = await response.json();
+                const wordData = data[0];
+
+                currentSearchedWord = {
+                    word: wordData.word,
+                    phonetic: wordData.phonetic || wordData.phonetics[0]?.text || '',
+                    meaning: wordData.meanings[0]?.definitions[0]?.definition || ''
+                };
+
+                document.getElementById('res-word').innerText = wordData.word;
+                document.getElementById('res-phonetic').innerText = currentSearchedWord.phonetic;
+                
+                defsContainer.innerHTML = '';
+                
+                const targets = wordData.meanings.slice(0, 3);
+                targets.forEach((meaning) => {
+                    const block = document.createElement('div');
+                    block.className = 'definition-block';
+
+                    const pos = document.createElement('span');
+                    pos.className = 'part-of-speech';
+                    pos.innerText = meaning.partOfSpeech;
+
+                    const defText = document.createElement('div');
+                    defText.className = 'meaning';
+                    defText.innerHTML = `<strong>Definition:</strong> ${meaning.definitions[0].definition}`;
+
+                    block.appendChild(pos);
+                    block.appendChild(defText);
+
+                    if (meaning.definitions[0].example) {
+                        const exText = document.createElement('div');
+                        exText.className = 'example';
+                        exText.innerText = `Example: ${meaning.definitions[0].example}`;
+                        block.appendChild(exText);
+                    }
+
+                    defsContainer.appendChild(block);
+                });
+
+                const collectBtn = document.getElementById('dict-collect-btn');
+                collectBtn.onclick = function() {
+                    const quickMeaning = wordData.meanings[0]?.definitions[0]?.definition || 'Vocab Note';
+                    collectWord(wordData.word, quickMeaning, currentSearchedWord.phonetic);
+                };
+
+            } catch (error) {
+                defsContainer.innerHTML = `<p class="error-msg">❌ Dictionary lookup failed for "${word}". Please try another word.</p>`;
+                document.getElementById('res-word').innerText = 'No Result';
+                document.getElementById('res-phonetic').innerText = '';
+            }
+        }
+
+        // 智慧金鑰與型號重試防封鎖機制 ( fetchGeminiWithBackoff )
+        async function fetchGeminiWithBackoff(prompt, responseSchema = null, retries = 5, delay = 1000) {
+            const activeModel = getActiveGeminiModel();
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${activeModel}:generateContent?key=${getActiveApiKey()}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            if (responseSchema) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                    responseSchema: responseSchema
+                };
+            }
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const resData = await response.json();
+                        const text = resData.candidates?.[0]?.content?.parts?.[0]?.text;
+                        return text ? JSON.parse(text) : null;
+                    }
+                } catch (e) {}
+                
+                if (i < retries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; 
+                }
+            }
+            throw new Error("All API retries failed.");
+        }
+
+        function getMasteredWords() {
+            return Object.keys(wordStats).filter(w => wordStats[w] && wordStats[w].correctCount >= 5);
+        }
+
+        /* --- 核心演算法：自訂單字本智慧降頻隨機抽選機制 --- */
+        function selectWeightedCustomWords() {
+            if (myWordList.length === 0) return [];
+            
+            const weightedPool = [];
+            myWordList.forEach(item => {
+                const clean = item.word.trim().toLowerCase();
+                const correctCount = (wordStats[clean] && wordStats[clean].correctCount) || 0;
+                
+                // 智慧權重：未答對過或答對次數少者，抽選權重極高。
+                // 答對 >= 5 次（精通 🌟）者，權重設為最底限 1（機率降為原本的十分之一）
+                let weight = 10 - correctCount;
+                if (correctCount >= 5) {
+                    weight = 1; 
+                }
+                if (weight < 1) weight = 1;
+                
+                for (let i = 0; i < weight; i++) {
+                    weightedPool.push(item);
+                }
+            });
+            
+            // 從加權池中抽選 5 個不重複的單字
+            const selected = [];
+            const tempPool = [...weightedPool];
+            while (selected.length < Math.min(5, myWordList.length) && tempPool.length > 0) {
+                const randomIndex = Math.floor(Math.random() * tempPool.length);
+                const choice = tempPool[randomIndex];
+                if (!selected.some(w => w.word.toLowerCase() === choice.word.toLowerCase())) {
+                    selected.push(choice);
+                }
+                // 從臨時池中移除該單字的所有權重副本，避免重複抽選
+                for (let i = tempPool.length - 1; i >= 0; i--) {
+                    if (tempPool[i].word.toLowerCase() === choice.word.toLowerCase()) {
+                        tempPool.splice(i, 1);
+                    }
+                }
+            }
+            return selected;
+        }
+
+        /* --- 核心 AI 出題模組：完美排除精通詞並強制更新句型結構 --- */
+        async function generateAiChallenges(level) {
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    challenges: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                word: { type: "STRING" },
+                                cn: { type: "STRING" },
+                                en: { type: "STRING" }
+                            },
+                            required: ["word", "cn", "en"]
+                        }
+                    }
+                },
+                required: ["challenges"]
+            };
+
+            const mastered = getMasteredWords();
+            const masteredListStr = mastered.length > 0 ? mastered.join(', ') : 'None';
+
+            // 透過在 Prompt 內加上高強度隨機擾動因子 (Dynamic Seed)，徹底打破 LLM 快取與生成偏誤，確保完全不同的句子結構。
+            const dynamicSeed = Math.random().toString(36).substring(7);
+            const timestamp = Date.now();
+
+            const prompt = `Generate exactly 5 practical English vocabulary words at CEFR level "${level}" suitable for high school language learning.
+            For each word:
+            1. Provide the English word.
+            2. Provide a brief Traditional Chinese definition.
+            3. Provide an engaging context sentence based on realistic high school scenarios (classroom, clubs, exams, campus life) with the target word completely replaced by "________".
+
+            CRITICAL DIRECTIVES FOR COMPLETE UNIQUENESS:
+            - RANDOM SEED FOR ABSOLUSHUTE DIVERSITY: [Seed: ${dynamicSeed}, Timestamp: ${timestamp}]. Use this distinct seed to construct completely fresh sentence layouts, distinct verb choices, and original scenarios.
+            - ANTI-REPETITION MANDATE: The user has already mastered the following words (answered correctly 5+ times): [${masteredListStr}]. 
+              DO NOT use or generate any of these mastered words under any circumstances. Select 5 completely fresh words.
+            - UNIQUE SCENARIOS: Even if you must reuse a word, you MUST write a completely new, unique, and creative sentence. Never repeat or reuse previously generated sentences.
+            - Ensure that "en" contains "________" where the word be blanked out. Do not write the word in the example sentence. Return strictly valid JSON matching the schema.`;
+
+            try {
+                const data = await fetchGeminiWithBackoff(prompt, schema);
+                if (data && data.challenges && data.challenges.length === 5) {
+                    return data.challenges;
+                }
+            } catch (err) {
+                // API 降級時，使用大容量本地庫，並過濾掉精通單字後隨機洗牌
+                let pool = localCefrData[level].filter(item => !mastered.includes(item.word.toLowerCase()));
+                if (pool.length < 3) pool = localCefrData[level];
+                return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+            }
+            let pool = localCefrData[level].filter(item => !mastered.includes(item.word.toLowerCase()));
+            if (pool.length < 3) pool = localCefrData[level];
+            return [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+        }
+
+        async function generateCustomListChallenges(wordArray) {
+            // 首先使用智慧加權演算法在前端篩選出這輪要測試的 5 個單字（大幅降頻精通單字！）
+            const selectedWords = selectWeightedCustomWords();
+            if (selectedWords.length === 0) return [];
+            
+            const wordListString = selectedWords.map(w => w.word).join(', ');
+            
+            const dynamicSeed = Math.random().toString(36).substring(7);
+            const timestamp = Date.now();
+
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    challenges: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                word: { type: "STRING" },
+                                cn: { type: "STRING" },
+                                en: { type: "STRING" }
+                            },
+                            required: ["word", "cn", "en"]
+                        }
+                    }
+                },
+                required: ["challenges"]
+            };
+
+            const prompt = `I have selected these words from my vocabulary list: [${wordListString}].
+            For each of these words, please generate:
+            1. The word itself.
+            2. A brief, accurate Traditional Chinese translation.
+            3. A fresh, original contextual sentence relating to high school life, with the word completely replaced by "________" so the student can guess the spelling.
+            
+            CRITICAL ANTI-REPETITION DIRECTIVE FOR COMPLETE UNIQUENESS:
+            - RANDOM SEED FOR ABSOLUTE DIVERSITY: [Seed: ${dynamicSeed}, Timestamp: ${timestamp}]. Ensure every generated sentence is fully distinct, using creative storylines and fresh phrasing.
+            - Write a COMPLETELY NEW and creative scenario for each word. Never reuse sentences from previous generations.
+            - Do not write the word itself inside the sentence. Return valid JSON matching the schema.`;
+
+            try {
+                const data = await fetchGeminiWithBackoff(prompt, schema);
+                if (data && data.challenges && data.challenges.length > 0) {
+                    return data.challenges;
+                }
+            } catch (err) {
+                return selectedWords.map(w => ({
+                    word: w.word,
+                    cn: w.meaning || "大考必備單字",
+                    en: `Spelling Challenge! Translate this word to English: "________"`
+                }));
+            }
+
+            return selectedWords.map(w => ({
+                word: w.word,
+                cn: w.meaning || "大考必備單字",
+                en: `Spelling Challenge! Translate this word to English: "________"`
+            }));
+        }
+
+        // 切換測驗/生成模式
+        function switchGameMode(mode) {
+            currentGameMode = mode;
+            document.getElementById('mode-ai').classList.remove('active');
+            document.getElementById('mode-custom').classList.remove('active');
+            document.getElementById(`mode-${mode}`).classList.add('active');
+
+            const cefrSelectRow = document.getElementById('cefr-select-row');
+            if (mode === 'custom') {
+                cefrSelectRow.style.display = 'none';
+            } else {
+                cefrSelectRow.style.display = 'flex';
+            }
+
+            if (!gameState.isPlaying) {
+                drawGameLobby();
+            }
+        }
+
+        // 語境偵探難度級別下拉選單變更事件
+        function onGameLevelChange(levelValue) {
+            activeGameLevel = levelValue;
+            gameData = [...localCefrData[activeGameLevel]];
+            if (gameState.isPlaying) {
+                endGame(false);
+            }
+            drawGameLobby();
+            showToast(`🎯 已將「語境遊戲」字彙庫切換至：${levelValue}`);
+        }
+
+        // 語境偵探繪圖與挑戰模組
+        function drawGameLobby() {
+            ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.03)';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for(let x = 0; x < logicalWidth; x += gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, logicalHeight); ctx.stroke();
+            }
+            for(let y = 0; y < logicalHeight; y += gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(logicalWidth, y); ctx.stroke();
+            }
+
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#312e81";
+            ctx.font = "bold 26px 'Segoe UI', 'Heiti TC', 'Microsoft JhengHei', sans-serif";
+            ctx.fillText("VOCAB TRAINER DETECTIVE", logicalWidth / 2, logicalHeight / 2 - 40);
+
+            ctx.fillStyle = "#1e293b";
+            ctx.font = "bold 15px 'Segoe UI', 'Heiti TC', 'Microsoft JhengHei', sans-serif";
+            const sourceName = currentGameMode === 'ai' ? `CEFR ${activeGameLevel}` : "我的個人單字筆記本測驗";
+            ctx.fillText("挑戰數據來源： " + sourceName, logicalWidth / 2, logicalHeight / 2 + 5);
+
+            ctx.fillStyle = "#475569";
+            ctx.font = "500 14px 'Segoe UI', 'Heiti TC', 'Microsoft JhengHei', sans-serif";
+            ctx.fillText("系統會智慧排除已熟練的單字，讓背單字變成一場極具針對性的解密探索！", logicalWidth / 2, logicalHeight / 2 + 38);
+            ctx.fillText("點擊下方「開始挑戰」展開專屬您的偵探訓練。", logicalWidth / 2, logicalHeight / 2 + 65);
+        }
+
+        let loadingAngle = 0;
+        function drawLoadingScreen() {
+            ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+            ctx.save();
+            ctx.translate(logicalWidth / 2, logicalHeight / 2 - 20);
+            ctx.rotate(loadingAngle);
+            loadingAngle += 0.08;
+
+            ctx.strokeStyle = "rgba(99, 102, 241, 0.15)";
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = "var(--primary)";
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 0.6);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#312e81";
+            ctx.font = "bold 18px 'Segoe UI', 'Heiti TC', sans-serif";
+            ctx.fillText("🤖 AI 正在聯網過濾熟練詞並撰寫全新語意例句...", logicalWidth / 2, logicalHeight / 2 + 40);
+            ctx.font = "14px 'Segoe UI', sans-serif";
+            ctx.fillStyle = "var(--text-muted)";
+            ctx.fillText("這將需要約 3 - 5 秒鐘，每次生成的關卡皆為百分百原創。", logicalWidth / 2, logicalHeight / 2 + 65);
+        }
+
+        // 核心 Canvas 動畫與回饋繪圖迴圈
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+
+            if (gameState.loading) {
+                drawLoadingScreen();
+                gameState.gameLoopId = requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            // 倒數計時扣減
+            if (gameState.feedbackType === "") {
+                gameState.timeLeft -= 0.11;
+                if (gameState.timeLeft <= 0) {
+                    gameState.timeLeft = 0;
+                    triggerTimeout();
+                }
+            }
+
+            let offsetX = 0, offsetY = 0;
+            if (gameState.shakeIntensity > 0) {
+                offsetX = (Math.random() - 0.5) * gameState.shakeIntensity;
+                offsetY = (Math.random() - 0.5) * gameState.shakeIntensity;
+                gameState.shakeIntensity *= 0.88;
+                if (gameState.shakeIntensity < 0.1) gameState.shakeIntensity = 0;
+            }
+
+            ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+            ctx.save();
+            ctx.translate(offsetX, offsetY);
+            
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+            ctx.strokeStyle = 'rgba(99, 102, 241, 0.03)';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for(let x = 0; x < logicalWidth; x += gridSize) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, logicalHeight); ctx.stroke();
+            }
+            for(let y = 0; y < logicalHeight; y += gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(logicalWidth, y); ctx.stroke();
+            }
+
+            // 1. 狀態欄
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(20, 20, logicalWidth - 40, 42);
+            ctx.strokeStyle = "rgba(99, 102, 241, 0.15)";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(20, 20, logicalWidth - 40, 42);
+
+            ctx.textAlign = "left";
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 15px 'Segoe UI', 'Heiti TC', sans-serif";
+            const tag = currentGameMode === 'ai' ? `CEFR ${activeGameLevel}` : "我的單字清單";
+            ctx.fillText("🕵️‍♂️ 挑戰模式：" + tag + " ｜ 關卡：" + (gameState.currentIndex + 1) + " / " + gameData.length + " 題", 35, 46);
+
+            ctx.textAlign = "right";
+            ctx.fillStyle = "var(--primary)";
+            ctx.fillText("總分: " + gameState.score + " 分", logicalWidth - 35, 46);
+
+            // 2. 顯示中文提示與英文例句
+            const currentQ = gameData[gameState.currentIndex];
+            
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 18px 'Segoe UI', 'Heiti TC', sans-serif";
+            ctx.fillText("【語意提示】： " + currentQ.cn, logicalWidth / 2, 115);
+
+            ctx.font = "italic 17px 'Segoe UI', 'Heiti TC', sans-serif";
+            
+            let sentenceToShow = currentQ.en;
+            if (!sentenceToShow.includes("________")) {
+                sentenceToShow = sentenceToShow.replace(new RegExp(currentQ.word, 'gi'), "________");
+            }
+
+            if (gameState.feedbackType !== "") {
+                sentenceToShow = sentenceToShow.replace("________", "[ " + currentQ.word.toUpperCase() + " ]");
+                ctx.fillStyle = gameState.feedbackType === "correct" ? "#047857" : "#be123c";
+            } else {
+                const hintStr = getWordHint(currentQ.word);
+                sentenceToShow = sentenceToShow.replace("________", " [ " + hintStr + " ] ");
+                ctx.fillStyle = "#1e293b";
+            }
+
+            wrapText(ctx, sentenceToShow, logicalWidth / 2, 175, logicalWidth - 120, 26);
+
+            // 3. 倒數計時條
+            const timerY = logicalHeight - 35;
+            const timerHeight = 8;
+            const timerWidth = logicalWidth - 60;
+            
+            ctx.fillStyle = "rgba(99, 102, 241, 0.08)";
+            ctx.fillRect(30, timerY, timerWidth, timerHeight);
+
+            if (gameState.timeLeft > 0) {
+                let timerGrad = ctx.createLinearGradient(30, 0, logicalWidth - 30, 0);
+                timerGrad.addColorStop(0, '#818cf8');
+                timerGrad.addColorStop(1, '#6366f1');
+
+                ctx.fillStyle = timerGrad;
+                ctx.fillRect(30, timerY, (gameState.timeLeft / 100) * timerWidth, timerHeight);
+            }
+
+            // 4. 半透明狀態徽章
+            if (gameState.feedbackType !== "") {
+                ctx.save();
+                ctx.shadowColor = "rgba(0, 0, 0, 0.08)";
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetY = 3;
+
+                let pillBg = "rgba(16, 185, 129, 0.95)"; 
+                let pillText = "✨ 成功破譯！正確答案！";
+                
+                if (gameState.feedbackType === "wrong") {
+                    pillBg = "rgba(244, 63, 94, 0.95)"; 
+                    pillText = "💡 線索不符！再接再厲！";
+                } else if (gameState.feedbackType === "timeout") {
+                    pillBg = "rgba(245, 158, 11, 0.95)"; 
+                    pillText = "⏳ 時間逾期！正確單字已在上方公佈。";
+                }
+
+                ctx.fillStyle = pillBg;
+                const pillWidth = 480;
+                const pillHeight = 44;
+                const pillX = logicalWidth / 2 - pillWidth / 2;
+                const pillY = 265;
+
+                ctx.beginPath();
+                if (typeof ctx.roundRect === 'function') {
+                    ctx.roundRect(pillX, pillY, pillWidth, pillHeight, 10);
+                } else {
+                    ctx.rect(pillX, pillY, pillWidth, pillHeight);
+                }
+                ctx.fill();
+
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 15px 'Segoe UI', 'Heiti TC', sans-serif";
+                ctx.fillText(pillText, logicalWidth / 2, pillY + 27);
+                ctx.restore();
+            }
+
+            // 5. 粒子渲染
+            gameState.particles.forEach((p, idx) => {
+                p.update();
+                p.draw();
+                if (p.alpha <= 0) {
+                    gameState.particles.splice(idx, 1);
+                }
+            });
+
+            ctx.restore();
+            gameState.gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        async function startGame() {
+            initCanvasResolution();
+            gameState.score = 0;
+            gameState.currentIndex = 0;
+            gameState.particles = [];
+            document.getElementById('game-review-section').style.display = 'none';
+
+            if (currentGameMode === "custom") {
+                if (myWordList.length < 3) {
+                    showToast("⚠️ 您的單字列表至少需要 3 個單字才能啟動小測驗唷！");
+                    return;
+                }
+            }
+
+            gameState.loading = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('game-status-msg').innerText = "🔮 智慧出題引擎正在過濾熟練詞與載入題目，請稍候...";
+            
+            gameState.isPlaying = true;
+            if (gameState.gameLoopId) cancelAnimationFrame(gameState.gameLoopId);
+            gameLoop();
+
+            // 智慧分流：直接調用 AI API 生成！平台會在運行時將有效金鑰注入變數。若呼叫失敗則自動 fallback 回本地資料庫。
+            try {
+                if (currentGameMode === "ai") {
+                    gameData = await generateAiChallenges(activeGameLevel);
+                } else {
+                    gameData = await generateCustomListChallenges(myWordList);
+                }
+            } catch (err) {
+                // 如果 API 連線失敗或無網路，則降級到本地
+                const mastered = getMasteredWords();
+                if (currentGameMode === "ai") {
+                    // 過濾掉熟練詞
+                    let pool = localCefrData[activeGameLevel].filter(item => !mastered.includes(item.word.toLowerCase()));
+                    if (pool.length < 3) {
+                        pool = localCefrData[activeGameLevel]; 
+                    }
+                    // 隨機抽選 5 個
+                    gameData = [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+                } else {
+                    // 自訂單字本離線生成（使用前端智慧降頻演算法，選出這一輪測驗的 5 個單字！）
+                    let pool = selectWeightedCustomWords();
+                    gameData = pool.map(w => ({
+                        word: w.word,
+                        cn: w.meaning || "我的單字",
+                        en: `Spelling Challenge! Translate this word to English: "________"`
+                    }));
+                }
+            }
+
+            gameState.loading = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('game-input').disabled = false;
+            document.getElementById('submit-btn').disabled = false;
+            document.getElementById('game-input').focus();
+            
+            document.getElementById('game-status-msg').innerText = "已載入全新 " + gameData.length + " 道挑戰題！請觀察例句並拼寫單字。";
+            document.getElementById('game-status-msg').style.color = "var(--text-main)";
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (gameState.currentIndex >= gameData.length) {
+                endGame(true);
+                return;
+            }
+
+            document.getElementById('game-input').value = '';
+            document.getElementById('game-input').focus();
+            gameState.timeLeft = 100; // 滿分狀態 (100%)
+            gameState.feedbackType = "";
+        }
+
+        function triggerTimeout() {
+            gameState.feedbackType = "timeout";
+            gameState.shakeIntensity = 5;
+            createExplosion(logicalWidth / 2, logicalHeight / 2, false);
+            document.getElementById('game-status-msg').innerText = `🧐 時間到！請看螢幕顯示正確單字。`;
+            document.getElementById('game-status-msg').style.color = "#92400e";
+            
+            setTimeout(() => {
+                gameState.currentIndex++;
+                loadQuestion();
+            }, 2500);
+        }
+
+        function checkAnswer() {
+            if (!gameState.isPlaying || gameState.feedbackType !== "") return;
+
+            const inputElement = document.getElementById('game-input');
+            const userAnswer = inputElement.value.trim().toLowerCase();
+            const currentQ = gameData[gameState.currentIndex];
+            const correctAnswer = currentQ.word.toLowerCase();
+
+            if (!userAnswer) return;
+
+            if (userAnswer === correctAnswer) {
+                // 將 100% 分成五等份
+                let earnedPoints = 20; 
+                
+                if (gameState.timeLeft >= 80) {
+                    earnedPoints = 20; 
+                } else if (gameState.timeLeft >= 60) {
+                    earnedPoints = 18; 
+                } else if (gameState.timeLeft >= 40) {
+                    earnedPoints = 16; 
+                } else if (gameState.timeLeft >= 20) {
+                    earnedPoints = 14; 
+                } else {
+                    earnedPoints = 12; 
+                }
+
+                gameState.score += earnedPoints;
+                gameState.feedbackType = "correct";
+                createExplosion(logicalWidth / 2, logicalHeight / 2, true);
+                
+                const cleanWord = correctAnswer.trim().toLowerCase();
+                if (!wordStats[cleanWord]) {
+                    wordStats[cleanWord] = { correctCount: 0 };
+                }
+                wordStats[cleanWord].correctCount += 1;
+                saveWordStats();
+
+                const countMsg = "[答對 " + wordStats[cleanWord].correctCount + " 次" + (wordStats[cleanWord].correctCount >= 5 ? ' (已熟練) 🌟' : '') + "]";
+                document.getElementById('game-status-msg').innerText = "✨ 回答正確！獲得分數 (+" + earnedPoints + "分) " + countMsg;
+                document.getElementById('game-status-msg').style.color = "var(--success)";
+            } else {
+                gameState.feedbackType = "wrong";
+                gameState.shakeIntensity = 8;
+                createExplosion(logicalWidth / 2, logicalHeight / 2, false);
+                
+                document.getElementById('game-status-msg').innerText = `❌ 拼寫不對，請看螢幕上的正確句子。`;
+                document.getElementById('game-status-msg').style.color = "var(--accent)";
+            }
+
+            setTimeout(() => {
+                gameState.currentIndex++;
+                loadQuestion();
+            }, 2500);
+        }
+
+        function endGame(completed = true) {
+            gameState.isPlaying = false;
+            if (gameState.gameLoopId) cancelAnimationFrame(gameState.gameLoopId);
+            
+            document.getElementById('game-input').disabled = true;
+            document.getElementById('submit-btn').disabled = true;
+            
+            const startBtn = document.getElementById('start-btn');
+            startBtn.style.display = 'inline-block';
+            startBtn.innerText = '再次挑戰';
+
+            ctx.clearRect(0, 0, logicalWidth, logicalHeight);
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#312e81";
+            ctx.font = "bold 32px 'Segoe UI', 'Heiti TC', sans-serif";
+            ctx.fillText("🏆 語境推理挑戰圓滿成功 🏆", logicalWidth / 2, logicalHeight / 2 - 40);
+
+            ctx.fillStyle = "#0f172a";
+            ctx.font = "bold 22px 'Segoe UI', 'Heiti TC', sans-serif";
+            ctx.fillText("您的最終總分：", logicalWidth / 2, logicalHeight / 2 + 10);
+            ctx.fillStyle = "var(--primary)";
+            ctx.fillText(gameState.score + " 分", logicalWidth / 2, logicalHeight / 2 + 45);
+
+            ctx.fillStyle = "#334155";
+            ctx.font = "600 15px 'Segoe UI', 'Heiti TC', sans-serif";
+            
+            let rankMsg = "回答速度越快分數越高喔！繼續保持敏銳的情境直覺！";
+            if(gameState.score >= 90) rankMsg = "太神啦！神速破譯，你是高分滿分型超級單字神探！";
+            ctx.fillText(rankMsg, logicalWidth / 2, logicalHeight / 2 + 80);
+
+            if (completed) {
+                document.getElementById('game-status-msg').innerText = "挑戰結束！請在下方查看本次小測驗的所有字彙與例句解析。";
+                document.getElementById('game-status-msg').style.color = "var(--primary)";
+                renderGameReview();
+            } else {
+                document.getElementById('game-status-msg').innerText = "挑戰中斷，已重置。";
+                document.getElementById('game-status-msg').style.color = "var(--text-muted)";
+            }
+        }
+
+        function renderGameReview() {
+            const reviewSection = document.getElementById('game-review-section');
+            const reviewList = document.getElementById('game-review-list');
+            reviewList.innerHTML = '';
+
+            gameData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'ai-card';
+                card.innerHTML = `
+                    <div class="card-header-actions">
+                        <div>
+                            <span class="ai-word-tag" style="cursor:pointer;" onclick="searchWord('${item.word}')">${item.word}</span>
+                            <span style="color: var(--text-muted); font-size:0.9rem; margin-left: 0.5rem;">[點擊查詢]</span>
+                        </div>
+                        <button class="btn-collect" onclick="collectWord('${item.word}', '${item.cn}')">收藏此單字 ✨</button>
+                    </div>
+                    <div class="ai-situation">中文釋義：${item.cn}</div>
+                    <div class="ai-sentence">${item.en.replace("________", `<strong>${item.word}</strong>`)}</div>
+                `;
+                reviewList.appendChild(card);
+            });
+
+            reviewSection.style.display = 'block';
+        }
+
+        // 學生造句與寫作批改 (完全對接真實金鑰 Gemini API 即時診斷與精進句型回傳，無檢測攔截機制)
+        async function submitSentenceForCritique(index, word) {
+            const textInput = document.getElementById(`textarea-${index}`).value.trim();
+            const feedbackDiv = document.getElementById(`feedback-${index}`);
+            const btn = document.getElementById(`btn-grade-${index}`);
+
+            if (!textInput) {
+                showToast("⚠️ 請先輸入您的英文造句再送出批改喔！");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "批改中...";
+            feedbackDiv.innerHTML = `
+                <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.8rem; display:flex; align-items:center; gap:0.4rem;">
+                    🔄 AI 寫作教練正在分析語法與用詞流暢度，請稍候...
+                </div>
+            `;
+
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    score: { type: "INTEGER" },
+                    critique: { type: "STRING" },
+                    improved: { type: "STRING" }
+                },
+                required: ["score", "critique", "improved"]
+            };
+
+            const prompt = `You are an expert high school English writing coach. 
+            A high school student wrote this sentence using the target word "${word}": "${textInput}".
+            Please analyze this sentence and return a JSON object with:
+            1. "score": An integer score out of 100 based on grammar, spelling, naturalness, and correct usage of the target word.
+            2. "critique": A helpful, friendly critique written in Traditional Chinese pointing out any grammatical mistakes, word choice improvements, or praising correct usage.
+            3. "improved": A polished, natural-sounding version of their sentence. 
+            Strictly output valid JSON matching the schema.`;
+
+            try {
+                const data = await fetchGeminiWithBackoff(prompt, schema);
+                btn.disabled = false;
+                btn.innerText = "重新批改 ✨";
+
+                if (data) {
+                    const isHigh = data.score >= 70;
+                    feedbackDiv.innerHTML = `
+                        <div class="feedback-box ${isHigh ? '' : 'error'}">
+                            <div class="feedback-score ${isHigh ? '' : 'low'}">
+                                ${isHigh ? '🏆' : '💡'} 寫作得分：${data.score} 分
+                            </div>
+                            <div class="feedback-text"><strong>AI 批改評語：</strong>${data.critique}</div>
+                            <div class="feedback-suggestion">
+                                <strong>💡 推薦精進句型：</strong><br>${data.improved}
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                // 如果金鑰尚未被注入、網路斷開或 AI 異常，降級到本地自主比對與對照模式
+                btn.disabled = false;
+                btn.innerText = "AI 即時批改 ✨";
+                const containsWord = textInput.toLowerCase().includes(word.toLowerCase());
+                const matchedSample = [...localCefrData.A1, ...localCefrData.B1, ...localCefrData.C1, ...localCefrData.B2, ...localCefrData.C2].find(i => i.word.toLowerCase() === word.toLowerCase());
+                const sampleSentence = matchedSample ? matchedSample.en : `I need to focus on my final mock exams.`;
+
+                feedbackDiv.innerHTML = `
+                    <div class="feedback-box ${containsWord ? '' : 'error'}">
+                        <div class="feedback-score">
+                            ⚠️ 本地自我對照模式 (離線備用)
+                        </div>
+                        <div class="feedback-text">
+                            ${containsWord 
+                              ? `✅ <strong>檢測成功：</strong>您已成功在句子中寫出目標單字「<strong>${word}</strong>」！`
+                              : `❌ <strong>未偵測到：</strong>句子中似乎拼錯或漏掉了目標單字「<strong>${word}</strong>」，請檢查！`}
+                        </div>
+                        <div class="feedback-suggestion">
+                            <strong>💡 寫作教練推薦情境示範：</strong><br>${sampleSentence}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 學生自主造句寫作練習隨機抽字邏輯
+        let currentWritingWords = [];
+        function initWritingSession() {
+            const container = document.getElementById('writing-board-container');
+            container.innerHTML = '';
+
+            let pool = [];
+            if (myWordList && myWordList.length >= 5) {
+                // 在學生寫作抽取中，一樣導入「智慧權重抽樣」！優先練習不熟悉的單字，極大降低已精通單字的出現率
+                pool = selectWeightedCustomWords();
+            } else {
+                const combined = [...localCefrData.B1, ...localCefrData.B2, ...localCefrData.C1];
+                pool = combined.map(item => ({ word: item.word, meaning: item.cn }));
+                showToast("💡 您的筆記本收藏少於 5 字，已自動為您抽選大考高頻字彙！");
+            }
+
+            currentWritingWords = pool.slice(0, 5);
+
+            currentWritingWords.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'writing-card';
+                card.id = `writing-card-${index}`;
+
+                card.innerHTML = `
+                    <div class="writing-header">
+                        <div class="writing-word-info">
+                            ✍️ ${item.word} 
+                            <span class="writing-word-meaning">(${item.meaning || item.cn})</span>
+                        </div>
+                        <button class="btn-small" onclick="searchWord('${item.word}')">查詢字典 📖</button>
+                    </div>
+                    <textarea class="writing-textarea" id="textarea-${index}" placeholder="請用單字 '${item.word}' 造出一個英文句子..."></textarea>
+                    <div class="writing-actions">
+                        <button class="btn-collect" id="btn-grade-${index}" onclick="submitSentenceForCritique(${index}, '${item.word}')">
+                            AI 即時批改 ✨
+                        </button>
+                    </div>
+                    <div id="feedback-${index}"></div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 「我的單字列表」持久化與管理
+        let myWordList = JSON.parse(localStorage.getItem('myWordList')) || [
+            { word: "diligent", meaning: "勤奮的、用功的", phonetic: "/ˈdɪl.ə.dʒənt/" },
+            { word: "frustrated", meaning: "感到沮喪的、挫敗的", phonetic: "/ˈfrʌs.treɪ.tɪd/" },
+            { word: "collaborate", meaning: "合作、協作", phonetic: "/kəˈlæb.ə.reɪt/" }
+        ];
+
+        const recommendedCefrWords = [
+            { word: "accumulate", meaning: "累積", level: "B2" },
+            { word: "consequence", meaning: "後果、重要性", level: "B1" },
+            { word: "distinguish", meaning: "分辨、區別", level: "B2" },
+            { word: "essential", meaning: "不可或缺的", level: "B1" },
+            { word: "vulnerable", meaning: "易受傷的、脆弱的", level: "C1" },
+            { word: "prejudice", meaning: "偏見、歧視", level: "B2" },
+            { word: "accomplish", meaning: "實現、完成", level: "B2" },
+            { word: "negotiate", meaning: "協商、談判", level: "B1" }
+        ];
+
+        function saveLocalWordList() {
+            localStorage.setItem('myWordList', JSON.stringify(myWordList));
+        }
+
+        function collectWord(word, meaning, phonetic = "") {
+            const cleanWord = word.trim().toLowerCase();
+            const exists = myWordList.some(item => item.word.toLowerCase() === cleanWord);
+
+            if (exists) {
+                showToast(`ℹ️ 「${word}」已經在您的單字筆記本中囉！`);
+                return;
+            }
+
+            myWordList.push({
+                word: word.trim(),
+                meaning: meaning || "暫無中文釋義，點擊查詢字典",
+                phonetic: phonetic || ""
+            });
+
+            saveLocalWordList();
+            showToast(`✨ 「${word}」已成功加入您的單字本！`);
+            renderWordList();
+        }
+
+        function addManualWord() {
+            const wordInput = document.getElementById('manual-word');
+            const meaningInput = document.getElementById('manual-meaning');
+
+            const word = wordInput.value.trim();
+            const meaning = meaningInput.value.trim();
+
+            if (!word) {
+                showToast("⚠️ 請至少輸入英文單字！");
+                return;
+            }
+
+            collectWord(word, meaning);
+            wordInput.value = '';
+            meaningInput.value = '';
+            renderWordList();
+        }
+
+        function deleteWord(index, event) {
+            event.stopPropagation();
+            const deletedWord = myWordList[index].word;
+            myWordList.splice(index, 1);
+            saveLocalWordList();
+            showToast(`🗑️ 「${deletedWord}」已從筆記本中移出。`);
+            renderWordList();
+        }
+
+        function renderWordList() {
+            const container = document.getElementById('word-list-container');
+            container.innerHTML = '';
+
+            if (myWordList.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-tip" style="grid-column: 1 / -1;">
+                        📭 目前您的單字列表空空如也，快去「單字字典」或「AI 造句」中一鍵加入吧！
+                    </div>
+                `;
+                return;
+            }
+
+            myWordList.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'vocab-card';
+                const clean = item.word.trim().toLowerCase();
+                const count = (wordStats[clean] && wordStats[clean].correctCount) || 0;
+                
+                let badgeHtml = '';
+                if (count >= 5) {
+                    badgeHtml = `<span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.15rem 0.4rem; border-radius: 12px; margin-left: 0.5rem; font-weight: 700;">已熟練 🌟</span>`;
+                } else if (count > 0) {
+                    badgeHtml = `<span style="font-size: 0.7rem; background: rgba(99, 102, 241, 0.08); color: var(--primary); padding: 0.15rem 0.4rem; border-radius: 12px; margin-left: 0.5rem; font-weight: 600;">已答對 ${count} 次</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="vocab-info" onclick="searchWord('${item.word}')" title="點擊直接進行字典查詢">
+                        <h4>${item.word} ${badgeHtml}</h4>
+                        <div class="vocab-meaning">${item.meaning}</div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 0.8rem; border-top: 1px solid var(--border-soft); padding-top: 0.6rem;">
+                        <button class="btn-small" onclick="deleteWord(${index}, event)">刪除</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderRecommendationTags() {
+            const container = document.getElementById('rec-tags-container');
+            container.innerHTML = '';
+
+            recommendedCefrWords.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'rec-tag-btn';
+                btn.innerHTML = `
+                    <strong>${item.word}</strong> <span style="font-size:0.75rem; color:var(--text-muted);">(${item.meaning})</span>
+                    <span style="background:rgba(99,102,241,0.1); color:var(--primary); font-size:0.7rem; border-radius:4px; padding:0.1rem 0.25rem;">${item.level}</span>
+                `;
+                btn.onclick = function() {
+                    collectWord(item.word, item.meaning);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        /* --- 8. 鍵盤事件與載入初始化 --- */
+        document.getElementById('game-input').addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        document.getElementById('dict-input').addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                searchWord();
+            }
+        });
+
+        // 網頁載入後立即啟動適配與渲染
+        window.onload = function() {
+            initCanvasResolution();
+            drawGameLobby();
+            checkApiKeyStatus(); // 靜默檢查，完全不拋錯
+            renderWordList();
+            renderRecommendationTags();
+        }
+    </script>
+</body>
+</html>
